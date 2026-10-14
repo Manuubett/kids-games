@@ -1806,5 +1806,12 @@ body.fs .bar .stars,body.fs .bar .dots{display:none}
   openDB(function(){loadClips(function(){if(!$('#record').hidden)renderRecord()})});
 })();
 </script>
+<script>
+  ...your game...
+  window.NY = function(){ ... };   <- the hook line still goes inside this script
+  applyLang();
+  openDB(...);
+</script>
+<script src="noo-yesss-pack.js"></script>   <- the pack goes here
 </body>
 </html>
