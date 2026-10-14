@@ -66,7 +66,7 @@ button{cursor:pointer}
 .hero p{max-width:34ch}
 label{font-family:var(--display);font-size:1.5rem}
 .field{display:flex;flex-direction:column;gap:10px}
-input[type=text]{
+input[type=text],input[type=number]{
   border:4px solid var(--ink);border-radius:18px;padding:14px 16px;font-size:1.5rem;font-weight:800;background:var(--soft);width:100%;min-width:0;
 }
 .players{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -180,6 +180,30 @@ input[type=text]{
 .tdash-stat span{display:block;font-size:.92rem;font-weight:800}
 .tdash-actions{display:flex;gap:10px;flex-wrap:wrap}
 
+/* kid home screen */
+.who{display:flex;align-items:center;gap:14px;min-width:0}
+.avatar{font-size:3.4rem;line-height:1;background:var(--soft);border:4px solid var(--ink);border-radius:50%;width:84px;height:84px;display:grid;place-items:center;flex:none}
+.homebtns{display:grid;gap:20px}
+.bigbtn{display:flex;align-items:center;gap:18px;border:5px solid var(--ink);border-radius:32px;padding:22px 24px;box-shadow:0 10px 0 var(--ink);color:#fff;text-align:left;min-height:160px;transition:transform .08s,box-shadow .08s}
+.bigbtn:hover{transform:translateY(-3px);box-shadow:0 13px 0 var(--ink)}
+.bigbtn:active{transform:translateY(8px);box-shadow:0 2px 0 var(--ink)}
+.bigbtn .bi{font-size:5.5rem;line-height:1;flex:none}
+.bigbtn .bt{font-family:var(--display);font-size:clamp(1.8rem,8vw,2.6rem);line-height:1.05}
+.b-tap{background:var(--bubblegum)}
+.b-games{background:var(--sky)}
+.homefoot{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.players .btn{font-size:1.4rem;min-height:60px}
+.topics{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.topic{flex-direction:column;text-align:center;padding:18px 10px;gap:10px}
+.topic .tile{width:96px;height:96px;font-size:3.4rem;border-radius:26px}
+.topic small{display:none}
+#speakBtn,#muteBtn,#backBtn,#gamesBack,#gruBack,#gateBack{font-size:1.7rem;min-width:56px;min-height:56px}
+#micBtn{font-size:2.4rem}
+.gsec{display:flex;flex-direction:column;gap:10px;padding-bottom:14px;border-bottom:3px dashed rgba(29,26,59,.25)}
+.gsec:last-child{border-bottom:0}
+.gsec h3{font-size:1.3rem}
+#gateMsg[hidden]{display:none}
+
 /* tap and hear (no reading needed) */
 .tapbtn{width:100%;font-size:1.6rem;background:var(--bubblegum)}
 .tappick{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:16px}
@@ -225,32 +249,74 @@ input[type=text]{
     <div id="players" class="players" hidden></div>
     <button class="btn tapbtn" id="tapGuest" type="button"></button>
     <div class="linkrow">
-      <button class="btn alt small" id="recOpenW" type="button"></button>
-      <button class="btn alt small" id="tOpenW" type="button"></button>
+      <button class="btn alt small" id="gruW" type="button">🔒</button>
     </div>
   </section>
 
-  <!-- MENU -->
+  <!-- HOME: only big pictures -->
   <section id="menu" class="card" hidden>
     <div class="bar">
-      <h2 id="hello"></h2>
+      <div class="who"><div class="avatar" id="avatar"></div><h2 id="hello"></h2></div>
       <div class="stars" id="menuStars">⭐ 0</div>
     </div>
-    <button class="btn tapbtn" id="tapOpen" type="button"></button>
-    <p id="chooseText"></p>
-    <p id="levelLabel"></p>
-    <div class="levels" id="levels"></div>
-    <div class="lang" role="group" aria-label="Language">
-      <button class="btn alt small" type="button" data-lang="en" aria-pressed="true">English</button>
-      <button class="btn alt small" type="button" data-lang="sw" aria-pressed="false">Kiswahili</button>
+    <div class="homebtns">
+      <button class="bigbtn b-tap" id="tapOpen" type="button"><span class="bi">👆</span><span class="bt" id="tapOpenText"></span></button>
+      <button class="bigbtn b-games" id="gamesOpen" type="button"><span class="bi">🎯</span><span class="bt" id="gamesOpenText"></span></button>
     </div>
-    <div class="levels" id="voices" role="group"></div>
+    <div class="homefoot">
+      <button class="btn alt small" id="changePlayer" type="button"></button>
+      <button class="btn alt small" id="gruOpen" type="button">🔒</button>
+    </div>
+  </section>
+
+  <!-- QUIZ GAMES: pick a topic by picture -->
+  <section id="games" class="card" hidden>
+    <div class="bar">
+      <button class="btn alt small" id="gamesBack" type="button">🏠</button>
+      <div class="stars" id="gamesStars">⭐ 0</div>
+    </div>
+    <h2 id="chooseText"></h2>
     <div class="topics" id="topics"></div>
-    <div class="row" style="gap:10px">
-      <button class="btn alt small" id="changePlayer" type="button" style="flex:0 1 auto"></button>
-      <button class="btn alt small" id="recOpenM" type="button" style="flex:0 1 auto"></button>
-      <button class="btn alt small" id="tOpenM" type="button" style="flex:0 1 auto"></button>
+  </section>
+
+  <!-- GROWN-UPS: settings, parent recordings, teacher dashboard -->
+  <section id="grown" class="card" hidden>
+    <div class="bar">
+      <button class="btn alt small" id="gruBack" type="button">🏠</button>
+      <h2 id="gruTitle"></h2>
     </div>
+    <div class="gsec">
+      <h3 id="setLangLabel"></h3>
+      <div class="lang" role="group" aria-label="Language">
+        <button class="btn alt small" type="button" data-lang="en" aria-pressed="true">English</button>
+        <button class="btn alt small" type="button" data-lang="sw" aria-pressed="false">Kiswahili</button>
+      </div>
+    </div>
+    <div class="gsec" id="levelSec">
+      <h3 id="levelLabel"></h3>
+      <div class="levels" id="levels"></div>
+    </div>
+    <div class="gsec">
+      <h3 id="setVoiceLabel"></h3>
+      <div class="levels" id="voices" role="group"></div>
+    </div>
+    <div class="gsec">
+      <button class="btn alt small" id="recOpenM" type="button"></button>
+      <button class="btn alt small" id="tOpenM" type="button"></button>
+    </div>
+  </section>
+
+  <!-- GATE: keeps small children out of the grown-ups area -->
+  <section id="gate" class="card" hidden>
+    <div class="bar"><button class="btn alt small" id="gateBack" type="button">🏠</button></div>
+    <h2 id="gateTitle"></h2>
+    <p id="gateHelp"></p>
+    <form id="gateForm" class="field" autocomplete="off">
+      <label for="gateInput" id="gateQ"></label>
+      <input id="gateInput" type="number" inputmode="numeric" required>
+      <button class="btn" type="submit" id="gateGo"></button>
+    </form>
+    <p id="gateMsg" class="alertline warn" hidden></p>
   </section>
 
   <!-- GAME -->
@@ -361,9 +427,9 @@ input[type=text]{
       heroText:'A little game that teaches. Pick the right answer and hear Yesss. Pick the wrong one and try again.',
       nameLabel:'What is your name?',namePh:'Type your name',play:"Let's play",already:'Already playing?',
       hello:'Hello, {n}!',choose:'Choose something to learn today.',change:'Not me? Change player',
-      levelLabel:'My level:',levels:{pg:'Playgroup',pp1:'PP1',pp2:'PP2',g1:'Grade 1',g2:'Grade 2',g3:'Grade 3'},
+      levelLabel:'Child level',levels:{pg:'Playgroup',pp1:'PP1',pp2:'PP2',g1:'Grade 1',g2:'Grade 2',g3:'Grade 3'},
       voiceLady:'👩 Lady voice',voiceMan:'👨 Man voice',
-      tapOpen:'👆 Tap and hear',tapGuest:'👆 Play without typing',tapHint:'Tap me!',guestName:'Friend',tFruits:'Fruits and food',tVehicles:'Vehicles',tBody:'Body',tThings:'Things at home',tNature:'Nature',
+      tapOpen:'Tap and hear',gamesOpen:'Quiz games',gruTitle:'Grown-ups',setLangLabel:'Language',setVoiceLabel:'Reading voice',gateTitle:'Grown-ups only',gateHelp:'Solve this to continue:',gateWrong:'Not quite. Try again.',gateGo:'Open',tapGuest:'👆 Play without typing',tapHint:'Tap me!',guestName:'Friend',tFruits:'Fruits and food',tVehicles:'Vehicles',tBody:'Body',tThings:'Things at home',tNature:'Nature',
       ops:{'+':'plus','-':'minus','×':'times'},
       menu:'Menu',soundOn:'Sound: on',soundOff:'Sound: off',listen:'🔊 Listen',listenLabel:'Read the question aloud',
       micStart:'🎤 Speak your answer',micStop:'⏹ Stop listening',micListening:'Listening… say your answer now.',micNoMatch:'I did not catch that. Try again or tap an answer.',micUnsupported:'Speech recognition is not available in this browser. Please tap an answer.',micDenied:'Microphone access was blocked. Allow it in your browser settings, or tap an answer.',micError:'I could not hear that clearly. Try again or tap an answer.',micMatched:'I heard: {a}',
@@ -406,9 +472,9 @@ input[type=text]{
       heroText:'Mchezo mdogo wa kujifunza. Chagua jibu sahihi usikie Ndiyooo. Ukikosea, jaribu tena.',
       nameLabel:'Jina lako ni nani?',namePh:'Andika jina lako',play:'Tucheze',already:'Wachezaji wengine:',
       hello:'Habari, {n}!',choose:'Chagua cha kujifunza leo.',change:'Si wewe? Badilisha mchezaji',
-      levelLabel:'Darasa langu:',levels:{pg:'Playgroup',pp1:'PP1',pp2:'PP2',g1:'Darasa la 1',g2:'Darasa la 2',g3:'Darasa la 3'},
+      levelLabel:'Darasa la mtoto',levels:{pg:'Playgroup',pp1:'PP1',pp2:'PP2',g1:'Darasa la 1',g2:'Darasa la 2',g3:'Darasa la 3'},
       voiceLady:'👩 Sauti ya mama',voiceMan:'👨 Sauti ya baba',
-      tapOpen:'👆 Gusa na usikie',tapGuest:'👆 Cheza bila kuandika',tapHint:'Nigusa!',guestName:'Rafiki',tFruits:'Matunda na chakula',tVehicles:'Vyombo vya usafiri',tBody:'Mwili',tThings:'Vitu vya nyumbani',tNature:'Mazingira',
+      tapOpen:'Gusa na usikie',gamesOpen:'Michezo ya maswali',gruTitle:'Wazazi na walimu',setLangLabel:'Lugha',setVoiceLabel:'Sauti ya kusoma',gateTitle:'Kwa watu wazima tu',gateHelp:'Tatua hili ili kuendelea:',gateWrong:'Si sahihi. Jaribu tena.',gateGo:'Fungua',tapGuest:'👆 Cheza bila kuandika',tapHint:'Nigusa!',guestName:'Rafiki',tFruits:'Matunda na chakula',tVehicles:'Vyombo vya usafiri',tBody:'Mwili',tThings:'Vitu vya nyumbani',tNature:'Mazingira',
       ops:{'+':'jumlisha','-':'toa','×':'mara'},
       menu:'Menyu',soundOn:'Sauti: imewashwa',soundOff:'Sauti: imezimwa',listen:'🔊 Sikiliza',listenLabel:'Soma swali kwa sauti',
       micStart:'🎤 Sema jibu lako',micStop:'⏹ Acha kusikiliza',micListening:'Nasikiliza… sema jibu lako sasa.',micNoMatch:'Sikusikia vizuri. Jaribu tena au gusa jibu.',micUnsupported:'Utambuzi wa sauti haupatikani kwenye kivinjari hiki. Tafadhali gusa jibu.',micDenied:'Ruhusa ya kipaza sauti imezuiwa. Ruhusu kwenye mipangilio ya kivinjari au gusa jibu.',micError:'Sikusikia vizuri. Jaribu tena au gusa jibu.',micMatched:'Nimesikia: {a}',
@@ -542,7 +608,7 @@ input[type=text]{
     return mk(T().q.math,visual,ans,near(ans),spoken);
   }
   function paintLevels(){
-    var box=$('#levels');box.innerHTML='';
+    var box=$('#levels');box.innerHTML='';$('#levelSec').hidden=!state.name;
     if(!state.name)return;
     LEVELS.forEach(function(k){
       var b=document.createElement('button');b.type='button';b.className='btn alt small';
@@ -557,7 +623,7 @@ input[type=text]{
   }
 
   var TOPICS=[
-    {id:'name',tile:'Aa',color:'var(--coral)',
+    {id:'name',tile:'🙋',color:'var(--coral)',
       build:function(name){
         var letters=name.replace(/\s/g,'');
         var first=letters.charAt(0).toUpperCase();
@@ -590,7 +656,7 @@ input[type=text]{
           return mk(q,'<div class="big" style="font-size:6rem">'+a[2]+'</div>',L(a),names,q,'q:animal');
         });
       }},
-    {id:'numbers',tile:'123',color:'var(--sky)',
+    {id:'numbers',tile:'🔢',color:'var(--sky)',
       build:function(){
         var cap=capFor();
         var pool=[];for(var n=1;n<=cap;n++)pool.push(n);
@@ -606,9 +672,9 @@ input[type=text]{
           return mk(q,'<div class="count">'+items+'</div>',n,pool,q,'q:number');
         });
       }},
-    {id:'math',tile:'+',color:'var(--coral)',
+    {id:'math',tile:'➕',color:'var(--coral)',
       build:function(){var out=[];for(var i=0;i<6;i++)out.push(mathQ(level()));return out}},
-    {id:'letters',tile:'Bb',color:'var(--tangerine)',
+    {id:'letters',tile:'🔤',color:'var(--tangerine)',
       build:function(){
         var pool=LETTERS[lang].slice(0,byTier([5,8,99]));
         var own=pool.map(function(l){return l[0]});
@@ -617,7 +683,7 @@ input[type=text]{
           return mk(letterShown(l),'<div class="big">'+l[2]+'</div>',l[0],optPool,letterSpoken(l),'q:letter:'+l[1]);
         });
       }},
-    {id:'shapes',tile:'▲',color:'var(--bubblegum)',
+    {id:'shapes',tile:'🔷',color:'var(--bubblegum)',
       build:function(){
         var keys=SHAPE_ORDER.slice(0,byTier([3,5,6]));
         var names=keys.map(function(k){return L(SHAPE_NAMES[k])});
@@ -1022,11 +1088,11 @@ input[type=text]{
 
   /* ---------- screens ---------- */
   function show(id){
-    ['welcome','menu','game','result','record','teacher','tap'].forEach(function(s){$('#'+s).hidden=(s!==id)});
+    ['welcome','menu','games','grown','gate','game','result','record','teacher','tap'].forEach(function(s){$('#'+s).hidden=(s!==id)});
     window.scrollTo(0,0);
   }
   function starCount(){return (players[state.name]&&players[state.name].stars)||0}
-  function paintStars(){var t='⭐ '+starCount();$('#menuStars').textContent=t;$('#gameStars').textContent=t;$('#tapStars').textContent=t}
+  function paintStars(){var t='⭐ '+starCount();$('#menuStars').textContent=t;$('#gameStars').textContent=t;$('#tapStars').textContent=t;$('#gamesStars').textContent=t}
   function addStar(){
     players[state.name]=players[state.name]||{stars:0};
     players[state.name].stars=starCount()+1;
@@ -1034,9 +1100,25 @@ input[type=text]{
   }
   function paintMute(){
     var b=$('#muteBtn');
-    b.textContent=muted?T().soundOff:T().soundOn;
+    b.textContent=muted?'🔕':'🔔';b.setAttribute('aria-label',muted?T().soundOff:T().soundOn);
     b.setAttribute('aria-pressed',muted?'true':'false');
   }
+
+  var AVATARS=['🦁','🐘','🦒','🐒','🦓','🐶','🐱','🐢','🦋','🐝'];
+  function avatarFor(name){var h=0;String(name).split('').forEach(function(c){h+=c.charCodeAt(0)});return AVATARS[h%AVATARS.length]}
+  function paintAvatar(){$('#avatar').textContent=state.name?avatarFor(state.name):''}
+
+  /* grown-ups gate: a multiplication question keeps small children out of settings */
+  var gateAns=0;
+  function openGate(){
+    var a=rnd(6,9),b=rnd(6,9);gateAns=a*b;
+    stopListening(true);stopVoice();clearTapTimers();
+    $('#gateQ').textContent=a+' × '+b+' = ?';
+    $('#gateInput').value='';$('#gateMsg').hidden=true;
+    show('gate');
+  }
+  function openGrown(){paintLevels();paintVoices();show('grown')}
+  function leaveGrown(){show(state.name?'menu':'welcome')}
 
   function paintPlayers(){
     var box=$('#players');var names=Object.keys(players);
@@ -1045,7 +1127,7 @@ input[type=text]{
     box.hidden=false;
     var s=document.createElement('span');s.textContent=T().already;box.appendChild(s);
     names.forEach(function(n){
-      var b=document.createElement('button');b.type='button';b.className='btn alt small';b.textContent=n;
+      var b=document.createElement('button');b.type='button';b.className='btn alt small';b.textContent=avatarFor(n)+' '+n;
       b.addEventListener('click',function(){login(n)});
       box.appendChild(b);
     });
@@ -1094,18 +1176,24 @@ input[type=text]{
     $('#playBtn').textContent=x.play;
     $('#chooseText').textContent=x.choose;
     $('#levelLabel').textContent=x.levelLabel;
-    $('#changePlayer').textContent=x.change;
-    $('#backBtn').textContent=x.menu;
-    $('#speakBtn').textContent=x.listen;
+    $('#changePlayer').textContent='🔄 '+x.change;
+    $('#backBtn').textContent='🏠';$('#backBtn').setAttribute('aria-label',x.menu);
+    $('#speakBtn').textContent='🔊';
     $('#speakBtn').setAttribute('aria-label',x.listenLabel);
     paintMicButton();
-    $('#againBtn').textContent=x.again;
-    $('#menuBtn').textContent=x.another;
-    $('#recOpenW').textContent=x.recOpen;
+    $('#againBtn').textContent='🔁';$('#againBtn').setAttribute('aria-label',x.again);
+    $('#menuBtn').textContent='🎯';$('#menuBtn').setAttribute('aria-label',x.another);
     $('#recOpenM').textContent=x.recOpen;
-    $('#tOpenW').textContent=x.tOpen;
     $('#tOpenM').textContent=x.tOpen;
-    $('#tapOpen').textContent=x.tapOpen;
+    $('#tapOpenText').textContent=x.tapOpen;
+    $('#gamesOpenText').textContent=x.gamesOpen;
+    $('#gruTitle').textContent=x.gruTitle;
+    $('#setLangLabel').textContent=x.setLangLabel;
+    $('#setVoiceLabel').textContent=x.setVoiceLabel;
+    $('#gateTitle').textContent=x.gateTitle;
+    $('#gateHelp').textContent=x.gateHelp;
+    $('#gateGo').textContent=x.gateGo;
+    paintAvatar();
     $('#tapGuest').textContent=x.tapGuest;
     $('#recBack').textContent=x.recBack;
     $('#recTitle').textContent=x.recTitle;
@@ -1127,6 +1215,7 @@ input[type=text]{
     players[name]=players[name]||{stars:0};
     store.set(players);
     $('#hello').textContent=fill(T().hello);
+    paintAvatar();
     paintStars();
     paintLevels();
     show('menu');
@@ -1141,7 +1230,7 @@ input[type=text]{
   function paintMicButton(){
     var b=$('#micBtn');
     if(!b)return;
-    b.textContent=listening?T().micStop:T().micStart;
+    b.textContent=listening?'⏹':'🎤';b.setAttribute('aria-label',listening?T().micStop:T().micStart);
     b.setAttribute('aria-pressed',listening?'true':'false');
   }
   function speechStatus(message){
@@ -1310,7 +1399,7 @@ input[type=text]{
         onend:function(){pending=setTimeout(goNext,700)}
       });
       var nb=$('#nextBtn');nb.hidden=false;
-      nb.textContent=(state.i===state.qs.length-1)?x.seeStars:x.next;
+      nb.textContent=(state.i===state.qs.length-1)?'⭐ '+x.seeStars:'➡️ '+x.next;
     }else{
       state.gotWrong=true;
       recordWrong();
@@ -1356,6 +1445,7 @@ input[type=text]{
     else{state.i++;showQ()}
   }
   function toMenu(){stopListening(true);stopVoice();show('menu')}
+  function toGames(){stopListening(true);stopVoice();show('games')}
 
   /* ---------- record your voice ---------- */
   var rec=null;   /* {id, mr} while a recording is running */
@@ -1462,7 +1552,7 @@ input[type=text]{
 
   function openRecord(){
     stopListening(true);stopVoice();showNote('');show('record');renderRecord()}
-  function closeRecord(){stopRec();stopVoice();show(state.name?'menu':'welcome')}
+  function closeRecord(){stopRec();stopVoice();show('grown')}
 
   /* ---------- teacher dashboard ---------- */
   function fmtDate(ts){
@@ -1634,7 +1724,7 @@ input[type=text]{
     body.appendChild(rs);
   }
   function openTeacher(){stopListening(true);stopVoice();show('teacher');renderTeacher()}
-  function closeTeacher(){show(state.name?'menu':'welcome')}
+  function closeTeacher(){show('grown')}
 
   /* ---------- events ---------- */
   $('#nameForm').addEventListener('submit',function(e){
@@ -1654,8 +1744,8 @@ input[type=text]{
       applyLang();
     });
   });
-  $('#backBtn').addEventListener('click',toMenu);
-  $('#menuBtn').addEventListener('click',toMenu);
+  $('#backBtn').addEventListener('click',toGames);
+  $('#menuBtn').addEventListener('click',toGames);
   $('#againBtn').addEventListener('click',function(){stopVoice();startTopic(state.topic)});
   $('#speakBtn').addEventListener('click',readQuestion);
   $('#micBtn').addEventListener('click',function(){if(listening)stopListening(true);else beginListening()});
@@ -1666,14 +1756,23 @@ input[type=text]{
     if(muted)stopVoice();
     paintMute();
   });
-  $('#recOpenW').addEventListener('click',openRecord);
   $('#recOpenM').addEventListener('click',openRecord);
   $('#recBack').addEventListener('click',closeRecord);
-  $('#tOpenW').addEventListener('click',openTeacher);
   $('#tOpenM').addEventListener('click',openTeacher);
   $('#tBack').addEventListener('click',closeTeacher);
 
   $('#tapOpen').addEventListener('click',openTap);
+  $('#gamesOpen').addEventListener('click',function(){stopVoice();show('games')});
+  $('#gamesBack').addEventListener('click',function(){stopVoice();show('menu')});
+  $('#gruW').addEventListener('click',openGate);
+  $('#gruOpen').addEventListener('click',openGate);
+  $('#gateBack').addEventListener('click',leaveGrown);
+  $('#gruBack').addEventListener('click',leaveGrown);
+  $('#gateForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    if(parseInt($('#gateInput').value,10)===gateAns){openGrown()}
+    else{$('#gateMsg').textContent=T().gateWrong;$('#gateMsg').hidden=false;$('#gateInput').value=''}
+  });
   $('#tapGuest').addEventListener('click',function(){login(T().guestName);openTap()});
   $('#tapBack').addEventListener('click',leaveTap);
   $('#tapHome').addEventListener('click',showTapPick);
