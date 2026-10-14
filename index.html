@@ -25,6 +25,7 @@
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}   /* without this, .card (display:flex) showed every screen at once */
 html,body{min-height:100%}
 body{
   background:var(--sun);color:var(--ink);font-family:var(--body);font-weight:600;font-size:18px;line-height:1.4;
@@ -226,6 +227,32 @@ input[type=text],input[type=number]{
 .tapend[hidden]{display:none}
 .tapend .row{width:100%}
 
+/* full-screen play: only the activity and a back button */
+body.fs{padding:0}
+body.fs main{max-width:none;gap:0;min-height:100dvh}
+body.fs .card{border:0;border-radius:0;box-shadow:none;min-height:100dvh;padding:14px 14px 24px;background:transparent}
+body.fs .bar .stars,body.fs .bar .dots{display:none}
+#game h2#prompt{font-size:clamp(1.4rem,6vw,2rem)}
+#game .visual{flex:1;min-height:200px}
+#game .opt{min-height:100px;font-size:2rem}
+#micBtn[aria-pressed="true"]{background:var(--coral);color:#fff}
+#tap .tappick{flex:1;align-content:center}
+#tap .tapcard{flex:1;min-height:55dvh}
+#tap .tapend{flex:1;justify-content:center}
+#games .topics{flex:1;align-content:center}
+#games h2{display:none}
+#menu .homebtns{flex:1;grid-template-rows:1fr 1fr}
+#menu .bigbtn{min-height:0}
+#result{justify-content:center}
+
+/* grown-ups side bar */
+#menuToggle{position:fixed;top:10px;right:10px;z-index:40;width:46px;height:46px;border:3px solid var(--ink);border-radius:14px;background:var(--paper);font-size:1.5rem;line-height:1;opacity:.85;box-shadow:0 3px 0 var(--ink)}
+#scrim{position:fixed;inset:0;background:rgba(29,26,59,.55);z-index:70}
+#scrim:not(.open){display:none}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:min(360px,90vw);background:var(--paper);border-right:5px solid var(--ink);z-index:80;padding:20px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;transform:translateX(-105%);visibility:hidden;transition:transform .2s,visibility .2s}
+#drawer.open{transform:none;visibility:visible}
+.dhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.confetti,.spark{display:none}}
 </style>
 </head>
@@ -233,10 +260,6 @@ input[type=text],input[type=number]{
 <main>
   <!-- WELCOME -->
   <section id="welcome" class="card">
-    <div class="lang" role="group" aria-label="Language">
-      <button class="btn alt small" type="button" data-lang="en" aria-pressed="true">English</button>
-      <button class="btn alt small" type="button" data-lang="sw" aria-pressed="false">Kiswahili</button>
-    </div>
     <div class="hero">
       <h1 id="heroTitle"></h1>
       <p id="heroText"></p>
@@ -248,9 +271,6 @@ input[type=text],input[type=number]{
     </form>
     <div id="players" class="players" hidden></div>
     <button class="btn tapbtn" id="tapGuest" type="button"></button>
-    <div class="linkrow">
-      <button class="btn alt small" id="gruW" type="button">🔒</button>
-    </div>
   </section>
 
   <!-- HOME: only big pictures -->
@@ -263,10 +283,6 @@ input[type=text],input[type=number]{
       <button class="bigbtn b-tap" id="tapOpen" type="button"><span class="bi">👆</span><span class="bt" id="tapOpenText"></span></button>
       <button class="bigbtn b-games" id="gamesOpen" type="button"><span class="bi">🎯</span><span class="bt" id="gamesOpenText"></span></button>
     </div>
-    <div class="homefoot">
-      <button class="btn alt small" id="changePlayer" type="button"></button>
-      <button class="btn alt small" id="gruOpen" type="button">🔒</button>
-    </div>
   </section>
 
   <!-- QUIZ GAMES: pick a topic by picture -->
@@ -277,33 +293,6 @@ input[type=text],input[type=number]{
     </div>
     <h2 id="chooseText"></h2>
     <div class="topics" id="topics"></div>
-  </section>
-
-  <!-- GROWN-UPS: settings, parent recordings, teacher dashboard -->
-  <section id="grown" class="card" hidden>
-    <div class="bar">
-      <button class="btn alt small" id="gruBack" type="button">🏠</button>
-      <h2 id="gruTitle"></h2>
-    </div>
-    <div class="gsec">
-      <h3 id="setLangLabel"></h3>
-      <div class="lang" role="group" aria-label="Language">
-        <button class="btn alt small" type="button" data-lang="en" aria-pressed="true">English</button>
-        <button class="btn alt small" type="button" data-lang="sw" aria-pressed="false">Kiswahili</button>
-      </div>
-    </div>
-    <div class="gsec" id="levelSec">
-      <h3 id="levelLabel"></h3>
-      <div class="levels" id="levels"></div>
-    </div>
-    <div class="gsec">
-      <h3 id="setVoiceLabel"></h3>
-      <div class="levels" id="voices" role="group"></div>
-    </div>
-    <div class="gsec">
-      <button class="btn alt small" id="recOpenM" type="button"></button>
-      <button class="btn alt small" id="tOpenM" type="button"></button>
-    </div>
   </section>
 
   <!-- GATE: keeps small children out of the grown-ups area -->
@@ -319,24 +308,19 @@ input[type=text],input[type=number]{
     <p id="gateMsg" class="alertline warn" hidden></p>
   </section>
 
-  <!-- GAME -->
+  <!-- GAME: full screen, only the question and a few icon buttons -->
   <section id="game" class="card" hidden>
     <div class="bar">
       <button class="btn alt small" id="backBtn" type="button"></button>
-      <button class="btn alt small" id="muteBtn" type="button" aria-pressed="false"></button>
+      <button class="btn alt small" id="speakBtn" type="button"></button>
+      <button class="btn alt small" id="micBtn" type="button" aria-pressed="false">🎤</button>
       <div class="dots" id="dots"></div>
       <div class="stars" id="gameStars">⭐ 0</div>
     </div>
-    <div class="prompt">
-      <h2 id="prompt"></h2>
-      <button class="btn alt small" id="speakBtn" type="button"></button>
-    </div>
+    <h2 id="prompt"></h2>
+    <p id="speechStatus" class="speech-status" role="status" aria-live="polite"></p>
     <div class="visual" id="visual"></div>
     <div class="opts" id="opts"></div>
-    <div class="voice-answer">
-      <button class="btn alt" id="micBtn" type="button" aria-pressed="false">🎤 Speak your answer</button>
-      <p id="speechStatus" class="speech-status" role="status" aria-live="polite"></p>
-    </div>
     <div class="fb" id="fb" hidden role="status" aria-live="polite"><div class="say" id="say"></div><div class="sub" id="sub"></div></div>
     <button class="btn" id="nextBtn" type="button" hidden></button>
   </section>
@@ -401,6 +385,36 @@ input[type=text],input[type=number]{
     <div id="tBody" style="display:flex;flex-direction:column;gap:16px"></div>
   </section>
 </main>
+
+<button id="menuToggle" type="button" aria-label="Grown-ups">☰</button>
+<div id="scrim"></div>
+<aside id="drawer" aria-label="Grown-ups">
+  <div class="dhead">
+    <h2 id="gruTitle"></h2>
+    <button class="btn alt small" id="drawerClose" type="button" aria-label="Close">✖</button>
+  </div>
+  <div class="gsec">
+    <h3 id="setLangLabel"></h3>
+    <div class="lang" role="group" aria-label="Language">
+      <button class="btn alt small" type="button" data-lang="en" aria-pressed="true">English</button>
+      <button class="btn alt small" type="button" data-lang="sw" aria-pressed="false">Kiswahili</button>
+    </div>
+  </div>
+  <div class="gsec" id="levelSec">
+    <h3 id="levelLabel"></h3>
+    <div class="levels" id="levels"></div>
+  </div>
+  <div class="gsec">
+    <h3 id="setVoiceLabel"></h3>
+    <div class="levels" id="voices" role="group"></div>
+    <button class="btn alt small" id="muteBtn" type="button" aria-pressed="false"></button>
+  </div>
+  <div class="gsec">
+    <button class="btn alt small" id="recOpenM" type="button"></button>
+    <button class="btn alt small" id="tOpenM" type="button"></button>
+    <button class="btn alt small" id="changePlayer" type="button"></button>
+  </div>
+</aside>
 
 <script>
 (function(){
@@ -1088,7 +1102,10 @@ input[type=text],input[type=number]{
 
   /* ---------- screens ---------- */
   function show(id){
-    ['welcome','menu','games','grown','gate','game','result','record','teacher','tap'].forEach(function(s){$('#'+s).hidden=(s!==id)});
+    ['welcome','menu','games','gate','game','result','record','teacher','tap'].forEach(function(s){$('#'+s).hidden=(s!==id)});
+    document.body.classList.toggle('fs',['menu','games','game','result','tap'].indexOf(id)>=0);
+    $('#menuToggle').hidden=!(id==='welcome'||id==='menu'||id==='games');
+    closeDrawer();
     window.scrollTo(0,0);
   }
   function starCount(){return (players[state.name]&&players[state.name].stars)||0}
@@ -1100,7 +1117,7 @@ input[type=text],input[type=number]{
   }
   function paintMute(){
     var b=$('#muteBtn');
-    b.textContent=muted?'🔕':'🔔';b.setAttribute('aria-label',muted?T().soundOff:T().soundOn);
+    b.textContent=muted?'🔕 '+T().soundOff:'🔔 '+T().soundOn;
     b.setAttribute('aria-pressed',muted?'true':'false');
   }
 
@@ -1117,7 +1134,12 @@ input[type=text],input[type=number]{
     $('#gateInput').value='';$('#gateMsg').hidden=true;
     show('gate');
   }
-  function openGrown(){paintLevels();paintVoices();show('grown')}
+  function openDrawer(){
+    paintLevels();paintVoices();paintMute();
+    $('#drawer').classList.add('open');$('#scrim').classList.add('open');
+  }
+  function closeDrawer(){$('#drawer').classList.remove('open');$('#scrim').classList.remove('open')}
+  function openGrown(){show(state.name?'menu':'welcome');openDrawer()}
   function leaveGrown(){show(state.name?'menu':'welcome')}
 
   function paintPlayers(){
@@ -1552,7 +1574,7 @@ input[type=text],input[type=number]{
 
   function openRecord(){
     stopListening(true);stopVoice();showNote('');show('record');renderRecord()}
-  function closeRecord(){stopRec();stopVoice();show('grown')}
+  function closeRecord(){stopRec();stopVoice();show(state.name?'menu':'welcome');openDrawer()}
 
   /* ---------- teacher dashboard ---------- */
   function fmtDate(ts){
@@ -1724,7 +1746,7 @@ input[type=text],input[type=number]{
     body.appendChild(rs);
   }
   function openTeacher(){stopListening(true);stopVoice();show('teacher');renderTeacher()}
-  function closeTeacher(){show('grown')}
+  function closeTeacher(){show(state.name?'menu':'welcome');openDrawer()}
 
   /* ---------- events ---------- */
   $('#nameForm').addEventListener('submit',function(e){
@@ -1734,7 +1756,7 @@ input[type=text],input[type=number]{
     login(n);
   });
   $('#changePlayer').addEventListener('click',function(){
-    $('#nameInput').value='';paintPlayers();show('welcome');
+    closeDrawer();$('#nameInput').value='';paintPlayers();show('welcome');
   });
   document.querySelectorAll('.lang button').forEach(function(b){
     b.addEventListener('click',function(){
@@ -1764,10 +1786,11 @@ input[type=text],input[type=number]{
   $('#tapOpen').addEventListener('click',openTap);
   $('#gamesOpen').addEventListener('click',function(){stopVoice();show('games')});
   $('#gamesBack').addEventListener('click',function(){stopVoice();show('menu')});
-  $('#gruW').addEventListener('click',openGate);
-  $('#gruOpen').addEventListener('click',openGate);
+  $('#menuToggle').addEventListener('click',openGate);
+  $('#drawerClose').addEventListener('click',closeDrawer);
+  $('#scrim').addEventListener('click',closeDrawer);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer()});
   $('#gateBack').addEventListener('click',leaveGrown);
-  $('#gruBack').addEventListener('click',leaveGrown);
   $('#gateForm').addEventListener('submit',function(e){
     e.preventDefault();
     if(parseInt($('#gateInput').value,10)===gateAns){openGrown()}
