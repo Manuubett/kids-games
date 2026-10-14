@@ -122,6 +122,7 @@ style.textContent=
 '.zgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px}'+
 '.zcell{border:4px solid var(--ink);border-radius:22px;background:var(--soft);min-height:96px;font-size:3.2rem;line-height:1;padding:8px;box-shadow:0 5px 0 var(--ink)}'+
 '.zcell.lock span{filter:brightness(0);opacity:.22}.zcell.hit{animation:boing .6s}'+
+'.zstat{font-family:var(--display);font-size:1.4rem;background:var(--ink);color:var(--sun);border-radius:999px;padding:6px 16px}.zstat[hidden]{display:none}'+
 '#zoo{min-height:100dvh}#zoo .bar{align-items:center}'+
 '.zrev{position:fixed;inset:0;z-index:90;background:rgba(29,26,59,.75);display:grid;place-items:center;padding:20px}'+
 '.zrev>div{background:var(--paper);border:5px solid var(--ink);border-radius:32px;padding:28px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;max-width:420px;width:100%;animation:pop .4s}'+
@@ -133,10 +134,10 @@ var hb=$('#menu .homebtns'),zb=document.createElement('button');
 zb.type='button';zb.className='bigbtn b-zoo';zb.id='zooOpen';
 zb.innerHTML='<span class="bi">🦁</span><span class="bt" id="zooOpenText"></span><span class="zdot" id="zooDot" hidden>🎁</span>';
 hb.appendChild(zb);
-var chip=document.createElement('div');chip.className='stars';chip.id='menuStreak';chip.hidden=true;
+var chip=document.createElement('div');chip.className='zstat';chip.id='menuStreak';chip.hidden=true;
 $('#menuStars').parentNode.insertBefore(chip,$('#menuStars').nextSibling);
 var zoo=document.createElement('section');zoo.id='zoo';zoo.className='card';zoo.hidden=true;
-zoo.innerHTML='<div class="bar"><button class="btn alt small" id="zooBack" type="button" style="font-size:1.7rem;min-width:56px;min-height:56px">🏠</button><div class="stars" id="zooStreak"></div><div class="stars" id="zooStars"></div></div>'+
+zoo.innerHTML='<div class="bar"><button class="btn alt small" id="zooBack" type="button" style="font-size:1.7rem;min-width:56px;min-height:56px">🏠</button><div class="zstat" id="zooStreak"></div><div class="zstat" id="zooStars"></div></div>'+
  '<h2 id="zooTitle"></h2><div class="zbar"><div class="zfill" id="zooFill"></div></div><p id="zooNext"></p><div class="zgrid" id="zooGrid"></div><p class="note" id="zooFact" hidden></p>';
 $('main').appendChild(zoo);
 
