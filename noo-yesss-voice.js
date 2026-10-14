@@ -14,7 +14,10 @@ function key(t){return NY.optKey(t)}
 var mode='mine';
 try{if(localStorage.getItem('nooyesss:vmode')==='phone')mode='phone'}catch(e){}
 var origClip=NY.get('clipUrl'),origSpeak=NY.get('speakText');
-function clip(id){return mode==='phone'?null:origClip(id)}
+/* built-in voice shipped with the game (file noo-yesss-voices.js), used when this device has no recording of its own */
+function builtIn(id){var b=window.NY_VOICES&&window.NY_VOICES[lg()];return (id&&b&&b[id])||null}
+function hasAny(id){return !!(NY.hasClip(id)||builtIn(id))}
+function clip(id){if(mode==='phone')return null;return origClip(id)||builtIn(id)}
 NY.set('clipUrl',clip);
 /* any text the game would read aloud is first looked up as a recording of that exact text */
 NY.set('speakText',function(text,pitch,rate,cb){
@@ -30,13 +33,13 @@ var V={
   rec:'🎙 Record',stop:'⏹ Stop',play:'▶ Play',del:'🗑 Delete',file:'📁 File',list:'☰ Groups',saved:'✓ Saved.',
   done:'Everything in this group is recorded! 🎉',blocked:'The microphone is not available here. Use File to pick a voice note, or open the game on a computer.',
   tooBig:'That file is too large. Please use a clip under 5 MB.',mine:'🎙 My voice',phone:'📱 Phone voice',modeTitle:'Who reads aloud?',open:'🎙 Record all items',
-  gSys:'Game phrases',gNames:'Children names',gQs:'Questions',gDays:'Day questions',gOpp:'Opposite questions',recorded:'recorded'},
+  gSys:'Game phrases',gNames:'Children names',gQs:'Questions',gDays:'Day questions',gOpp:'Opposite questions',recorded:'recorded',export:'📦 Save voices for release',exporting:'Preparing the file…',exportNone:'There are no recordings on this device yet.',exported:'Saved {n} recordings ({m} MB) as noo-yesss-voices.js. Put it next to the game and load it before the voice script. Children\'s names are left out.'},
  sw:{title:'Rekodi vitu vyote',help:'Chagua kundi na sema kila neno vizuri. Sauti yako hutumika kwanza. Ulichoruka kitasomwa na sauti ya simu.',
   say:'Sema vizuri kisha bonyeza Simamisha.',onlyMissing:'Onyesha tu nisivyorekodi',auto:'Nenda kwa kinachofuata moja kwa moja',back:'Rudi',
   rec:'🎙 Rekodi',stop:'⏹ Simamisha',play:'▶ Cheza',del:'🗑 Futa',file:'📁 Faili',list:'☰ Makundi',saved:'✓ Imehifadhiwa.',
   done:'Vyote katika kundi hili vimerekodiwa! 🎉',blocked:'Kipaza sauti hakipatikani hapa. Tumia Faili kuchagua ujumbe wa sauti, au fungua mchezo kwenye kompyuta.',
   tooBig:'Faili ni kubwa mno. Tumia klipu chini ya MB 5.',mine:'🎙 Sauti yangu',phone:'📱 Sauti ya simu',modeTitle:'Nani asome kwa sauti?',open:'🎙 Rekodi vitu vyote',
-  gSys:'Maneno ya mchezo',gNames:'Majina ya watoto',gQs:'Maswali',gDays:'Maswali ya siku',gOpp:'Maswali ya kinyume',recorded:'imerekodiwa'}
+  gSys:'Maneno ya mchezo',gNames:'Majina ya watoto',gQs:'Maswali',gDays:'Maswali ya siku',gOpp:'Maswali ya kinyume',recorded:'imerekodiwa',export:'📦 Hifadhi sauti kwa kutoa mchezo',exporting:'Naandaa faili…',exportNone:'Hakuna rekodi kwenye kifaa hiki bado.',exported:'Rekodi {n} zimehifadhiwa ({m} MB) kama noo-yesss-voices.js. Iweke karibu na mchezo na uipakie kabla ya script ya sauti. Majina ya watoto hayajajumuishwa.'}
 };
 function X(){return V[lg()]}
 
@@ -130,7 +133,7 @@ sec.innerHTML='<div class="bar"><button class="btn alt small" id="vBack" type="b
 $('main').appendChild(sec);
 
 function note(m){var n=$('#vNote');n.textContent=m||'';n.hidden=!m}
-function have(g){return g.items.filter(function(i){return NY.hasClip(i.k)}).length}
+function have(g){return g.items.filter(function(i){return hasAny(i.k)}).length}
 function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
 function paintLangBtns(){
   sec.querySelectorAll('[data-vl]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-vl')===lg()?'true':'false')});
@@ -153,15 +156,52 @@ function renderList(){
     b.addEventListener('click',function(){startGroup(g)});
     box.appendChild(b);
   });
+  var eb2=el('button','btn small',x.export);eb2.type='button';eb2.style.background='var(--sky)';
+  eb2.addEventListener('click',exportVoices);box.appendChild(eb2);
+}
+function exportVoices(){
+  var x=X(),out={en:{},sw:{}},old=window.NY_VOICES||{},skip={};
+  Object.keys(NY.players).forEach(function(n){skip[key(n)]=1});   /* never ship children's names */
+  ['en','sw'].forEach(function(l){var o=old[l]||{};Object.keys(o).forEach(function(k){out[l][k]=o[k]})});
+  note(x.exporting);
+  var r;try{r=indexedDB.open('nooyesss-voice',1)}catch(e){note(x.exportNone);return}
+  r.onerror=function(){note(x.exportNone)};
+  r.onsuccess=function(){
+    var items=[];
+    try{
+      var rq=r.result.transaction('clips').objectStore('clips').openCursor();
+      rq.onsuccess=function(){var c=rq.result;if(c){items.push({key:String(c.key),blob:c.value});c.continue()}else finish(items)};
+      rq.onerror=function(){note(x.exportNone)};
+    }catch(e){note(x.exportNone)}
+  };
+  function finish(items){
+    items=items.filter(function(it){return !skip[it.key.slice(it.key.indexOf('|')+1)]});
+    var left=items.length;
+    if(!left&&!Object.keys(out.en).length&&!Object.keys(out.sw).length){note(x.exportNone);return}
+    if(!left){write();return}
+    items.forEach(function(it){
+      var fr=new FileReader(),i=it.key.indexOf('|'),l=it.key.slice(0,i),k=it.key.slice(i+1);
+      fr.onload=function(){if(out[l])out[l][k]=fr.result;if(!--left)write()};
+      fr.onerror=function(){if(!--left)write()};
+      fr.readAsDataURL(it.blob);
+    });
+  }
+  function write(){
+    var js='/* Built-in voice for Noo or Yesss. Load this file BEFORE noo-yesss-voice.js */\nwindow.NY_VOICES='+JSON.stringify(out)+';\n';
+    var blob=new Blob([js],{type:'text/javascript'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='noo-yesss-voices.js';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},1500);
+    note(x.exported.replace('{n}',Object.keys(out.en).length+Object.keys(out.sw).length).replace('{m}',(blob.size/1048576).toFixed(1)));
+  }
 }
 function startGroup(g){
-  var items=onlyMissing?g.items.filter(function(i){return !NY.hasClip(i.k)}):g.items;
+  var items=onlyMissing?g.items.filter(function(i){return !hasAny(i.k)}):g.items;
   if(!items.length){note(X().done);return}
   note('');cur={g:g,items:items,i:0};renderStep();
 }
 function renderStep(){
   if(!cur){renderList();return}
-  var x=X(),it=cur.items[cur.i],box=$('#vBody'),has=NY.hasClip(it.k),busy=!!rec;
+  var x=X(),it=cur.items[cur.i],box=$('#vBody'),has=hasAny(it.k),busy=!!rec;
   box.innerHTML='';paintLangBtns();
   $('#vTitle').textContent=cur.g.title;$('#vHelp').textContent=x.say;
   var bar=el('div','vbar');bar.appendChild(el('i'));bar.firstChild.style.width=Math.round(100*(cur.i+1)/cur.items.length)+'%';
@@ -177,12 +217,12 @@ function renderStep(){
 
   var r2=el('div','vrow');
   var pb=el('button','btn alt small',x.play);pb.type='button';pb.disabled=busy||!has;
-  pb.addEventListener('click',function(){var u=origClip(it.k);if(u){NY.stopVoice();NY.playClip(u,function(){})}});
+  pb.addEventListener('click',function(){var u=origClip(it.k)||builtIn(it.k);if(u){NY.stopVoice();NY.playClip(u,function(){})}});
   var fl=el('label','btn alt small vfile');fl.appendChild(document.createTextNode(x.file));
   var inp=el('input');inp.type='file';inp.accept='audio/*';inp.disabled=busy;
   inp.addEventListener('change',function(){addFile(it.k,inp.files&&inp.files[0]);inp.value=''});
   fl.appendChild(inp);
-  var db=el('button','btn alt small',x.del);db.type='button';db.disabled=busy||!has;
+  var db=el('button','btn alt small',x.del);db.type='button';db.disabled=busy||!NY.hasClip(it.k);
   db.addEventListener('click',function(){NY.deleteClip(it.k);note('');renderStep()});
   r2.appendChild(pb);r2.appendChild(fl);r2.appendChild(db);box.appendChild(r2);
 
@@ -277,6 +317,7 @@ paintMode();
      get:function(n){return n==='clipUrl'?clipUrl:n==='speakText'?speakText:null},
      set:function(n,f){if(n==='clipUrl')clipUrl=f;else if(n==='speakText')speakText=f;else if(n==='phraseGroups')phraseGroups=f}}};
 
-   2. Add this line after the pack line, before </body>:
+   2. Add these lines after the pack line, before </body>. The voices file is optional and is made by the 'Save voices for release' button:
+   <script src="noo-yesss-voices.js"></script>
    <script src="noo-yesss-voice.js"></script>
 */
