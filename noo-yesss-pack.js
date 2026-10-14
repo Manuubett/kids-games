@@ -234,6 +234,7 @@ new MutationObserver(function(){
   if(!$('#menu').hidden){paintMenuBits();setTimeout(maybeReveal,500)}
 }).observe($('#menu'),{attributes:true,attributeFilter:['hidden']});
 
+window.NYPACK={OPP:OPP};   /* lets the voice pack list the opposites questions */
 NY.applyLang();   /* rebuild menus so the new topics and buttons appear */
 paintMenuBits();
 })();
