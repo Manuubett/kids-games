@@ -1801,17 +1801,13 @@ body.fs .bar .stars,body.fs .bar .dots{display:none}
   $('#tapHome').addEventListener('click',showTapPick);
   $('#tapAgain').addEventListener('click',function(){stopVoice();startTap(tap.cat)});
   $('#tapCard').addEventListener('click',onTapCard);
-
+  window.NY=function(){return {state:state,players:players,store:store,TXT:TXT,TOPICS:TOPICS,TAPCATS:TAPCATS,TAPLISTS:TAPLISTS,
+    mk:mk,shuffle:shuffle,pickOne:pickOne,byTier:byTier,L:L,T:T,lang:function(){return lang},say:say,show:show,cheer:cheer,
+    confetti:confetti,tone:tone,sparkle:sparkle,optKey:optKey,applyLang:applyLang,stopVoice:stopVoice}};
   applyLang();
   openDB(function(){loadClips(function(){if(!$('#record').hidden)renderRecord()})});
 })();
 </script>
-<script>
-  ...your game...
-  window.NY = function(){ ... };   <- the hook line still goes inside this script
-  applyLang();
-  openDB(...);
-</script>
-<script src="noo-yesss-pack.js"></script>   <- the pack goes here
+<script src="noo-yesss-pack.js"></script>
 </body>
 </html>
